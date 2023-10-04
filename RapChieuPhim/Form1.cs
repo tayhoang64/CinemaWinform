@@ -17,7 +17,6 @@ namespace RapChieuPhim
         public Form1()
         {
             InitializeComponent();
-            Renderuttons();
 
         }
 
@@ -33,21 +32,29 @@ namespace RapChieuPhim
                 {
                     Button btn = new System.Windows.Forms.Button();
                     Chair chair = NormalAndVIP[count];
-                    if (i < 4)
+                    if(chair.SttChair == 1)
                     {
-                        btn.BackColor = System.Drawing.Color.White;
-                        btn.FlatStyle = FlatStyle.Flat;
-                        btn.FlatAppearance.BorderColor = Color.LightGreen;
-                        btn.FlatAppearance.BorderSize = 1;
+                        btn.BackColor = System.Drawing.Color.Yellow; 
+                    } else
+                    {
+                        if (i < 4)
+                        {
+                            btn.BackColor = System.Drawing.Color.White;
+                            btn.FlatStyle = FlatStyle.Flat;
+                            btn.FlatAppearance.BorderColor = Color.LightGreen;
+                            btn.FlatAppearance.BorderSize = 1;
 
-                    }else if (i > 3)
-                    {
-                        btn.BackColor = System.Drawing.Color.White;
-                        btn.FlatStyle = FlatStyle.Flat;
-                        btn.FlatAppearance.BorderColor = Color.Red;
-                        btn.FlatAppearance.BorderSize = 1;
+                        }
+                        else if (i > 3)
+                        {
+                            btn.BackColor = System.Drawing.Color.White;
+                            btn.FlatStyle = FlatStyle.Flat;
+                            btn.FlatAppearance.BorderColor = Color.Red;
+                            btn.FlatAppearance.BorderSize = 1;
+                        }
                     }
-                    btn.Name = chair.NameChair;
+                    btn.Name = chair.Id.ToString();
+                    btn.Tag = chair;
                     btn.Size = new System.Drawing.Size(40, 40);
                     btn.TabIndex = 0;
                     btn.Text = chair.NameChair;
@@ -67,10 +74,11 @@ namespace RapChieuPhim
                 btn.FlatStyle = FlatStyle.Flat;
                 btn.FlatAppearance.BorderColor = Color.White;
                 btn.FlatAppearance.BorderSize = 1;
-                btn.Name = chair.NameChair;
+                btn.Name = chair.Id.ToString();
                 btn.Size = new System.Drawing.Size(40, 40);
                 btn.TabIndex = 0;
                 btn.Text = chair.NameChair;
+                btn.Tag = chair;
                 btn.UseVisualStyleBackColor = false;
                 btn.Click += new System.EventHandler(this.button1_Click);
                 btn.Location = new System.Drawing.Point(44 +i * 44, 448);
@@ -116,7 +124,65 @@ namespace RapChieuPhim
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Button button = (Button)sender;
+            if(button.BackColor == System.Drawing.Color.Yellow)
+            {
+                MessageBox.Show("Ghế đã được mua");
+                return;
+            } else if (button.BackColor == System.Drawing.Color.Blue)
+            {
+                button.BackColor = System.Drawing.Color.White;
+            } else {
+                button.BackColor = System.Drawing.Color.Blue;
+                CalcPrice();
+            }
+        }
 
+
+        private void CalcPrice()
+        {
+            double? total = 0;
+            foreach (var button in this.Controls.OfType<Button>())
+            {
+                if(button.BackColor == System.Drawing.Color.Blue)
+                {
+                    Chair data = button.Tag as Chair;
+                    total += data.CategoryChair.CategoryPrice;
+                }
+            }
+            txtTongTien.Text = total.ToString();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Renderuttons();
+            txtTongTien.Text = "0";
+        }
+
+        private void btnThanhToan_Click(object sender, EventArgs e)
+        {
+            foreach (var button in this.Controls.OfType<Button>())
+            {
+                if (button.BackColor == System.Drawing.Color.Blue)
+                {
+                    Chair data = button.Tag as Chair;
+                    data.SttChair = 1;
+                    context.SaveChanges();
+                    button.BackColor = System.Drawing.Color.Yellow;
+                }
+            }
+            txtTongTien.Text = "0";
+        }
+
+        private void lbManAnh_Click(object sender, EventArgs e)
+        {
+            List<Chair> listChairs = context.Chairs.ToList();
+            for (int i = 0; i < listChairs.Count; i++)
+            {
+                listChairs[i].SttChair = 0;
+            }
+            context.SaveChanges();
+            this.Close();
         }
     }
 }
